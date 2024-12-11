@@ -197,7 +197,7 @@ function getUsers(req, res) {
                     _b.trys.push([0, 2, , 3]);
                     return [4 /*yield*/, supabaseService_1.supabase
                             .from('users')
-                            .select('id, name, email, created_at')];
+                            .select('id, name, email')];
                 case 1:
                     _a = _b.sent(), users = _a.data, error = _a.error;
                     if (error)
@@ -232,7 +232,7 @@ function getUserById(req, res) {
                     _b.trys.push([1, 3, , 4]);
                     return [4 /*yield*/, supabaseService_1.supabase
                             .from('users')
-                            .select('id, name, email, created_at')
+                            .select('id, name, email')
                             .eq('id', id)
                             .single()];
                 case 2:
