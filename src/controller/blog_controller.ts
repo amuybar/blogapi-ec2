@@ -4,7 +4,7 @@ import { uploadImage } from '../utils/cloudinaryService';
 import { supabase } from '../utils/supabaseService';
 
 const createBlog = async (req: Request, res: Response) => {
-  const { title, summary, body,author, image } = req.body;
+  const { title, summary, body, author, image } = req.body;
 
   try {
     // Upload the image to Cloudinary
@@ -84,6 +84,35 @@ const getAllBlogs = async (req: Request, res: Response) => {
   }
 };
 
+const getBlogBySlug = async (req: Request, res: Response) => {
+  let { slug } = req.params;
+  if (slug.startsWith(':')) slug = slug.slice(1);
+
+  try {
+    const { data, error } = await supabase
+      .from('blogs')
+      .select('*')
+      .eq('slug', slug);
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      return res.status(404).send({ message: 'Blog Not Found' });
+    }
+
+    res.status(200).send({
+      message: 'Blog Retrieved Successfully',
+      data: data[0],
+    });
+  } catch (error) {
+    console.error('Error fetching blog by slug:', error);
+    res.status(500).send({
+      message: 'Internal Error Occurred while Fetching Blog by Slug',
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
 const updateBlog = async (req: Request, res: Response) => {
   let { slug } = req.params;
   if (slug.startsWith(':')) slug = slug.slice(1);
@@ -149,6 +178,7 @@ const deleteBlog = async (req: Request, res: Response) => {
 export {
   createBlog,
   getAllBlogs,
+  getBlogBySlug,
   updateBlog,
   deleteBlog
 };
