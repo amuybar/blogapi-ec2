@@ -28,6 +28,10 @@ app.get('/', function (req, res) {
 app.use(function (req, res) {
     res.status(404).json({ message: 'Not found' });
 });
+app.use(function (req, res, next) {
+    console.log("Received ".concat(req.method, " request to ").concat(req.path));
+    next();
+});
 // General Error Handling
 app.use(function (err, req, res, next) {
     console.error(err.stack);

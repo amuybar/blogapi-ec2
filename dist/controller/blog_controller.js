@@ -36,20 +36,24 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteBlog = exports.updateBlog = exports.getAllBlogs = exports.createBlog = void 0;
+exports.deleteBlog = exports.updateBlog = exports.getBlogBySlug = exports.getAllBlogs = exports.createBlog = void 0;
 var uuid_1 = require("uuid");
 var cloudinaryService_1 = require("../utils/cloudinaryService");
 var supabaseService_1 = require("../utils/supabaseService");
 var createBlog = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, title, summary, body, author, image, imageUrl, slug, date, _b, data, error, error_1;
+    var _a, title, summary, body, author, file, imageUrl, slug, date, _b, data, error, error_1;
     return __generator(this, function (_c) {
         switch (_c.label) {
             case 0:
-                _a = req.body, title = _a.title, summary = _a.summary, body = _a.body, author = _a.author, image = _a.image;
+                _a = req.body, title = _a.title, summary = _a.summary, body = _a.body, author = _a.author;
                 _c.label = 1;
             case 1:
                 _c.trys.push([1, 4, , 5]);
-                return [4 /*yield*/, (0, cloudinaryService_1.uploadImage)(image, (0, uuid_1.v4)())];
+                file = req.file;
+                if (!file) {
+                    return [2 /*return*/, res.status(400).send({ message: 'Image file is required' })];
+                }
+                return [4 /*yield*/, (0, cloudinaryService_1.uploadImage)(file.path, (0, uuid_1.v4)())];
             case 2:
                 imageUrl = _c.sent();
                 if (!imageUrl) {
@@ -136,8 +140,49 @@ var getAllBlogs = function (req, res) { return __awaiter(void 0, void 0, void 0,
     });
 }); };
 exports.getAllBlogs = getAllBlogs;
+var getBlogBySlug = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var slug, cleanedSlug, _a, data, error, error_3;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                console.log('Full params:', req.params);
+                slug = req.params.slug;
+                console.log('Slug received:', slug);
+                cleanedSlug = slug.startsWith(':') ? slug.slice(1) : slug;
+                _b.label = 1;
+            case 1:
+                _b.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, supabaseService_1.supabase
+                        .from('blogs')
+                        .select('*')
+                        .eq('slug', cleanedSlug)];
+            case 2:
+                _a = _b.sent(), data = _a.data, error = _a.error;
+                if (error)
+                    throw error;
+                if (!data || data.length === 0) {
+                    return [2 /*return*/, res.status(404).send({ message: 'Blog Not Found' })];
+                }
+                res.status(200).send({
+                    message: 'Blog Retrieved Successfully',
+                    data: data[0],
+                });
+                return [3 /*break*/, 4];
+            case 3:
+                error_3 = _b.sent();
+                console.error('Error fetching blog by slug:', error_3);
+                res.status(500).send({
+                    message: 'Internal Error Occurred while Fetching Blog by Slug',
+                    error: error_3 instanceof Error ? error_3.message : String(error_3),
+                });
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
+exports.getBlogBySlug = getBlogBySlug;
 var updateBlog = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var slug, _a, title, summary, body, _b, data, error, error_3;
+    var slug, _a, title, summary, body, _b, data, error, error_4;
     return __generator(this, function (_c) {
         switch (_c.label) {
             case 0:
@@ -166,11 +211,11 @@ var updateBlog = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 });
                 return [3 /*break*/, 4];
             case 3:
-                error_3 = _c.sent();
-                console.error('Error updating blog:', error_3);
+                error_4 = _c.sent();
+                console.error('Error updating blog:', error_4);
                 res.status(500).send({
                     message: 'Internal Error Occurred while Updating Blog',
-                    error: error_3 instanceof Error ? error_3.message : String(error_3),
+                    error: error_4 instanceof Error ? error_4.message : String(error_4),
                 });
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];
@@ -179,7 +224,7 @@ var updateBlog = function (req, res) { return __awaiter(void 0, void 0, void 0, 
 }); };
 exports.updateBlog = updateBlog;
 var deleteBlog = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var slug, _a, data, error, error_4;
+    var slug, _a, data, error, error_5;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -207,11 +252,11 @@ var deleteBlog = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 });
                 return [3 /*break*/, 4];
             case 3:
-                error_4 = _b.sent();
-                console.error('Error deleting blog:', error_4);
+                error_5 = _b.sent();
+                console.error('Error deleting blog:', error_5);
                 res.status(500).send({
                     message: 'Internal Error Occurred while Deleting Blog',
-                    error: error_4 instanceof Error ? error_4.message : String(error_4),
+                    error: error_5 instanceof Error ? error_5.message : String(error_5),
                 });
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];

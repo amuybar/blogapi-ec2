@@ -4,11 +4,17 @@ import { uploadImage } from '../utils/cloudinaryService';
 import { supabase } from '../utils/supabaseService';
 
 const createBlog = async (req: Request, res: Response) => {
-  const { title, summary, body, author, image } = req.body;
+  const { title, summary, body, author } = req.body; // image removed from body
 
   try {
+    // Ensure file was uploaded
+    const file = req.file;
+    if (!file) {
+      return res.status(400).send({ message: 'Image file is required' });
+    }
+
     // Upload the image to Cloudinary
-    const imageUrl = await uploadImage(image, uuidv4());
+    const imageUrl = await uploadImage(file.path, uuidv4());
     if (!imageUrl) {
       return res.status(500).send({ message: 'Image upload failed' });
     }
@@ -46,6 +52,7 @@ const createBlog = async (req: Request, res: Response) => {
     });
   }
 };
+
 
 const getAllBlogs = async (req: Request, res: Response) => {
   const { page = 1, limit = 10 } = req.query;
@@ -85,14 +92,18 @@ const getAllBlogs = async (req: Request, res: Response) => {
 };
 
 const getBlogBySlug = async (req: Request, res: Response) => {
-  let { slug } = req.params;
-  if (slug.startsWith(':')) slug = slug.slice(1);
+  console.log('Full params:', req.params);
+  const { slug } = req.params; 
+  console.log('Slug received:', slug);
+
+  // If slug starts with ':', remove it
+  const cleanedSlug = slug.startsWith(':') ? slug.slice(1) : slug;
 
   try {
     const { data, error } = await supabase
       .from('blogs')
       .select('*')
-      .eq('slug', slug);
+      .eq('slug', cleanedSlug);  // Use cleaned slug
 
     if (error) throw error;
 
@@ -112,6 +123,7 @@ const getBlogBySlug = async (req: Request, res: Response) => {
     });
   }
 };
+
 
 const updateBlog = async (req: Request, res: Response) => {
   let { slug } = req.params;
