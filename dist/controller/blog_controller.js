@@ -41,7 +41,7 @@ var uuid_1 = require("uuid");
 var cloudinaryService_1 = require("../utils/cloudinaryService");
 var supabaseService_1 = require("../utils/supabaseService");
 var createBlog = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, title, summary, body, author, file, imageUrl, slug, date, _b, data, error, error_1;
+    var _a, title, summary, body, author, imagePath, imageUrl, slug, date, _b, data, error, error_1;
     return __generator(this, function (_c) {
         switch (_c.label) {
             case 0:
@@ -49,11 +49,12 @@ var createBlog = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 _c.label = 1;
             case 1:
                 _c.trys.push([1, 4, , 5]);
-                file = req.file;
-                if (!file) {
-                    return [2 /*return*/, res.status(400).send({ message: 'Image file is required' })];
+                // Access the file path of the uploaded image
+                if (!req.file) {
+                    return [2 /*return*/, res.status(400).send({ message: 'No image file provided' })];
                 }
-                return [4 /*yield*/, (0, cloudinaryService_1.uploadImage)(file.path, (0, uuid_1.v4)())];
+                imagePath = req.file.path;
+                return [4 /*yield*/, (0, cloudinaryService_1.uploadImage)(imagePath, (0, uuid_1.v4)())];
             case 2:
                 imageUrl = _c.sent();
                 if (!imageUrl) {
@@ -70,11 +71,8 @@ var createBlog = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 _b = _c.sent(), data = _b.data, error = _b.error;
                 if (error)
                     throw error;
-                // Check if data exists and has at least one item
                 if (!data || data.length === 0) {
-                    return [2 /*return*/, res.status(500).send({
-                            message: 'Blog creation failed: No data returned',
-                        })];
+                    return [2 /*return*/, res.status(500).send({ message: 'Blog creation failed: No data returned' })];
                 }
                 res.status(201).send({
                     message: 'Blog Created Successfully',

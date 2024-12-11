@@ -6,6 +6,8 @@ import {
   deleteBlog,
 } from "../controller/blog_controller";
 
+import upload from '../middleware/multer_mid'; 
+
 const blogRoutes = (app) => {
   // Get, update, or delete a specific blog by slug
   app.route("/api/blogs/:slug")
@@ -13,12 +15,10 @@ const blogRoutes = (app) => {
     .put(updateBlog)
     .delete(deleteBlog);
   
-  // Create a new blog
+  // Create a new blog with multer middleware for image upload
   app.route("/api/blogs")
-    .post(createBlog)
+    .post(upload, createBlog)
     .get(getAllBlogs);
-
-  
 };
 
 export default blogRoutes;

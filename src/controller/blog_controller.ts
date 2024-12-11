@@ -4,17 +4,17 @@ import { uploadImage } from '../utils/cloudinaryService';
 import { supabase } from '../utils/supabaseService';
 
 const createBlog = async (req: Request, res: Response) => {
-  const { title, summary, body, author } = req.body; // image removed from body
+  const { title, summary, body, author } = req.body;
 
   try {
-    // Ensure file was uploaded
-    const file = req.file;
-    if (!file) {
-      return res.status(400).send({ message: 'Image file is required' });
+    // Access the file path of the uploaded image
+    if (!req.file) {
+      return res.status(400).send({ message: 'No image file provided' });
     }
+    const imagePath = req.file.path;
 
     // Upload the image to Cloudinary
-    const imageUrl = await uploadImage(file.path, uuidv4());
+    const imageUrl = await uploadImage(imagePath, uuidv4());
     if (!imageUrl) {
       return res.status(500).send({ message: 'Image upload failed' });
     }
@@ -29,15 +29,12 @@ const createBlog = async (req: Request, res: Response) => {
     const { data, error } = await supabase
       .from('blogs')
       .insert([{ slug, title, summary, body, date, author, imageUrl }])
-      .select(); 
+      .select();
 
     if (error) throw error;
 
-    // Check if data exists and has at least one item
     if (!data || data.length === 0) {
-      return res.status(500).send({
-        message: 'Blog creation failed: No data returned',
-      });
+      return res.status(500).send({ message: 'Blog creation failed: No data returned' });
     }
 
     res.status(201).send({
@@ -52,6 +49,7 @@ const createBlog = async (req: Request, res: Response) => {
     });
   }
 };
+
 
 
 const getAllBlogs = async (req: Request, res: Response) => {
