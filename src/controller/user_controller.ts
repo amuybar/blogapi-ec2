@@ -137,7 +137,7 @@ async function getUsers(req: Request, res: Response) {
     try {
         const { data: users, error } = await supabase
             .from('users')
-            .select('id, name, email, created_at');
+            .select('id, name, email');
 
         if (error) throw error;
 
@@ -159,7 +159,7 @@ async function getUserById(req: Request, res: Response) {
     try {
         const { data: user, error } = await supabase
             .from('users')
-            .select('id, name, email, created_at')
+            .select('id, name, email')
             .eq('id', id)
             .single();
 

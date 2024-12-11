@@ -82,8 +82,71 @@ const getAllBlogs = async (req: Request, res: Response) => {
       error: error instanceof Error ? error.message : String(error),
     });
   }
+//get blogs from slug
+ const getBlogBySlug = async (req: Request, res: Response) => {
+  try {
+    let { slug } = req.params;
+    if (slug.startsWith(':')) slug = slug.slice(1);
+
+    // Query the Supabase database for the blog with the specified slug
+    const { data, error } = await supabase
+      .from('blogs')
+      .select('*')  // Assuming you want to select all columns
+      .eq('slug', slug);  // Match the slug
+
+    // Handle errors
+    if (error) {
+      throw error;
+    }
+
+    // Check if any data was returned
+    if (!data || data.length === 0) {
+      return res.status(404).send({
+        message: 'No blog found with the given slug',
+        data: [],
+      });
+    }
+
+    // Send the response with the retrieved data
+    res.status(200).send({
+      message: 'Blog retrieved successfully',
+      data,
+    });
+
+  } catch (error) {
+    console.error("Detailed Error fetching blog by slug:", error);
+    res.status(500).send({
+      message: 'Internal Server Error',
+      error: error.message,
+    });
+  }
 };
 
+const getBlogBySlug=async(req:Request,res:Response)=>{
+    let { slug } = req.params;
+     if (slug.startsWith(':')) slug = slug.slice(1);
+    
+ const { data, error, count } = await supabase
+      .from('blogs')
+      .select(slug, { count: 'exact' })
+      .range(start, end);
+
+    if (error) throw error;
+
+    // Check if data exists
+    if (!data) {
+      return res.status(404).send({
+        message: 'No blogs found',
+        data: [],
+      });
+    }
+
+    res.status(200).send({
+      message: 'This Blog',
+      data,
+    });
+    
+}
 const updateBlog = async (req: Request, res: Response) => {
   let { slug } = req.params;
   if (slug.startsWith(':')) slug = slug.slice(1);
@@ -149,6 +212,7 @@ const deleteBlog = async (req: Request, res: Response) => {
 export {
   createBlog,
   getAllBlogs,
+  getBlogBySlug,  
   updateBlog,
   deleteBlog
 };
