@@ -169,6 +169,7 @@ async function getUser(req: Request, res: Response) {
         if (error) {
             return res.status(404).json({
                 message: 'User not found',
+                error: error instanceof Error? error.message : String(error),
             });
         }
 
