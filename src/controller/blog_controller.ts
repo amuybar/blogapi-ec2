@@ -23,8 +23,6 @@ const createBlog = async (req: Request, res: Response) => {
     const slug = title.toLowerCase().replace(/\s+/g, '-') + uuidv4();
     const date = new Date();
 
-    console.log('Data being sent to Supabase:', { slug, title, summary, body, date, author, imageUrl });
-
     // Insert into Supabase
     const { data, error } = await supabase
       .from('blogs')
@@ -63,6 +61,7 @@ const getAllBlogs = async (req: Request, res: Response) => {
       .from('blogs')
       .select('*', { count: 'exact' })
       .range(start, end);
+    
 
     if (error) throw error;
 

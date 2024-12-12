@@ -62,7 +62,6 @@ var createBlog = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 }
                 slug = title.toLowerCase().replace(/\s+/g, '-') + (0, uuid_1.v4)();
                 date = new Date();
-                console.log('Data being sent to Supabase:', { slug: slug, title: title, summary: summary, body: body, date: date, author: author, imageUrl: imageUrl });
                 return [4 /*yield*/, supabaseService_1.supabase
                         .from('blogs')
                         .insert([{ slug: slug, title: title, summary: summary, body: body, date: date, author: author, imageUrl: imageUrl }])

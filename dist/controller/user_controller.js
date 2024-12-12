@@ -135,6 +135,7 @@ function loginUser(req, res) {
             switch (_c.label) {
                 case 0:
                     _a = req.body, email = _a.email, password = _a.password;
+                    console.log(req.body);
                     _c.label = 1;
                 case 1:
                     _c.trys.push([1, 4, , 5]);
