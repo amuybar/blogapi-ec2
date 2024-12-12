@@ -20,7 +20,7 @@ const userRoutes = (app: Express): void => {
     app.get('/api/users', getUsers);
 
     // Get a user by ID
-    app.get('/api/users',authMiddleware, getUser);
+    app.get('/api/user',authMiddleware, getUser);
 
     // Update a user by ID
     app.put('/api/users/:id', updateUser);
