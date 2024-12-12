@@ -59,14 +59,12 @@ const getAllBlogs = async (req: Request, res: Response) => {
 
     const { data, error, count } = await supabase
       .from('blogs')
-      .select('*', { count: 'exact' })
+      .select('*, users(name)', { count: 'exact' }) 
       .range(start, end);
-    
 
     if (error) throw error;
 
-    // Check if data exists
-    if (!data) {
+    if (!data || data.length === 0) {
       return res.status(404).send({
         message: 'No blogs found',
         data: [],
@@ -74,9 +72,15 @@ const getAllBlogs = async (req: Request, res: Response) => {
       });
     }
 
+    // Map blogs to include author name
+    const blogsWithAuthor = data.map(blog => ({
+      ...blog,
+      authorName: blog.users?.name || 'Unknown', 
+    }));
+
     res.status(200).send({
       message: 'All Blogs',
-      data,
+      data: blogsWithAuthor,
       total: count || 0,
     });
   } catch (error) {
@@ -88,19 +92,19 @@ const getAllBlogs = async (req: Request, res: Response) => {
   }
 };
 
+
 const getBlogBySlug = async (req: Request, res: Response) => {
   console.log('Full params:', req.params);
   const { slug } = req.params; 
   console.log('Slug received:', slug);
 
-  // If slug starts with ':', remove it
   const cleanedSlug = slug.startsWith(':') ? slug.slice(1) : slug;
 
   try {
     const { data, error } = await supabase
       .from('blogs')
-      .select('*')
-      .eq('slug', cleanedSlug);  // Use cleaned slug
+      .select('*, users(name)') // Join with users table to get name
+      .eq('slug', cleanedSlug);
 
     if (error) throw error;
 
@@ -108,9 +112,14 @@ const getBlogBySlug = async (req: Request, res: Response) => {
       return res.status(404).send({ message: 'Blog Not Found' });
     }
 
+    const blog = {
+      ...data[0],
+      authorName: data[0].users?.name || 'Unknown', // Use name from users table
+    };
+
     res.status(200).send({
       message: 'Blog Retrieved Successfully',
-      data: data[0],
+      data: blog,
     });
   } catch (error) {
     console.error('Error fetching blog by slug:', error);
@@ -120,6 +129,7 @@ const getBlogBySlug = async (req: Request, res: Response) => {
     });
   }
 };
+
 
 
 const updateBlog = async (req: Request, res: Response) => {

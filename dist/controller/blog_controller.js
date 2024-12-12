@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -92,7 +103,7 @@ var createBlog = function (req, res) { return __awaiter(void 0, void 0, void 0, 
 }); };
 exports.createBlog = createBlog;
 var getAllBlogs = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, _b, page, _c, limit, start, end, _d, data, error, count, error_2;
+    var _a, _b, page, _c, limit, start, end, _d, data, error, count, blogsWithAuthor, error_2;
     return __generator(this, function (_e) {
         switch (_e.label) {
             case 0:
@@ -104,23 +115,26 @@ var getAllBlogs = function (req, res) { return __awaiter(void 0, void 0, void 0,
                 end = start + Number(limit) - 1;
                 return [4 /*yield*/, supabaseService_1.supabase
                         .from('blogs')
-                        .select('*', { count: 'exact' })
+                        .select('*, users(name)', { count: 'exact' })
                         .range(start, end)];
             case 2:
                 _d = _e.sent(), data = _d.data, error = _d.error, count = _d.count;
                 if (error)
                     throw error;
-                // Check if data exists
-                if (!data) {
+                if (!data || data.length === 0) {
                     return [2 /*return*/, res.status(404).send({
                             message: 'No blogs found',
                             data: [],
                             total: 0,
                         })];
                 }
+                blogsWithAuthor = data.map(function (blog) {
+                    var _a;
+                    return (__assign(__assign({}, blog), { authorName: ((_a = blog.users) === null || _a === void 0 ? void 0 : _a.name) || 'Unknown' }));
+                });
                 res.status(200).send({
                     message: 'All Blogs',
-                    data: data,
+                    data: blogsWithAuthor,
                     total: count || 0,
                 });
                 return [3 /*break*/, 4];
@@ -138,35 +152,37 @@ var getAllBlogs = function (req, res) { return __awaiter(void 0, void 0, void 0,
 }); };
 exports.getAllBlogs = getAllBlogs;
 var getBlogBySlug = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var slug, cleanedSlug, _a, data, error, error_3;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
+    var slug, cleanedSlug, _a, data, error, blog, error_3;
+    var _b;
+    return __generator(this, function (_c) {
+        switch (_c.label) {
             case 0:
                 console.log('Full params:', req.params);
                 slug = req.params.slug;
                 console.log('Slug received:', slug);
                 cleanedSlug = slug.startsWith(':') ? slug.slice(1) : slug;
-                _b.label = 1;
+                _c.label = 1;
             case 1:
-                _b.trys.push([1, 3, , 4]);
+                _c.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, supabaseService_1.supabase
                         .from('blogs')
-                        .select('*')
+                        .select('*, users(name)') // Join with users table to get name
                         .eq('slug', cleanedSlug)];
             case 2:
-                _a = _b.sent(), data = _a.data, error = _a.error;
+                _a = _c.sent(), data = _a.data, error = _a.error;
                 if (error)
                     throw error;
                 if (!data || data.length === 0) {
                     return [2 /*return*/, res.status(404).send({ message: 'Blog Not Found' })];
                 }
+                blog = __assign(__assign({}, data[0]), { authorName: ((_b = data[0].users) === null || _b === void 0 ? void 0 : _b.name) || 'Unknown' });
                 res.status(200).send({
                     message: 'Blog Retrieved Successfully',
-                    data: data[0],
+                    data: blog,
                 });
                 return [3 /*break*/, 4];
             case 3:
-                error_3 = _b.sent();
+                error_3 = _c.sent();
                 console.error('Error fetching blog by slug:', error_3);
                 res.status(500).send({
                     message: 'Internal Error Occurred while Fetching Blog by Slug',
