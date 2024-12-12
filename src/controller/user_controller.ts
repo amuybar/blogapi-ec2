@@ -155,13 +155,15 @@ async function getUsers(req: Request, res: Response) {
     }
 }
 
-async function getUserById(req: Request, res: Response) {
-    const { id } = req.params;
+
+async function getUser(req: Request, res: Response) {
+    const { email } = req.user as { email: string }; 
+
     try {
         const { data: user, error } = await supabase
             .from('users')
             .select('id, name, email')
-            .eq('id', id)
+            .eq('email', email)
             .single();
 
         if (error) {
@@ -172,13 +174,13 @@ async function getUserById(req: Request, res: Response) {
 
         res.status(200).json({
             message: 'User fetched successfully',
-            user
+            user,
         });
     } catch (error) {
-        console.error('Get user by ID error:', error);
+        console.error('Get user error:', error);
         res.status(500).json({
             message: 'Internal server error',
-            error: error instanceof Error ? error.message : String(error)
+            error: error instanceof Error ? error.message : String(error),
         });
     }
 }
@@ -260,7 +262,7 @@ export {
     createUser,
     getUsers,
     loginUser,
-    getUserById,
+    getUser,
     updateUser,
     deleteUser
 }

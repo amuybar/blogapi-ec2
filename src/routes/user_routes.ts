@@ -2,11 +2,12 @@ import {
     createUser,
     getUsers,
     loginUser,
-    getUserById,
+    getUser,
     updateUser,
     deleteUser,
 } from '../controller/user_controller';
 import { Express } from 'express';
+import { authMiddleware } from '../middleware/auth_mid';
 
 const userRoutes = (app: Express): void => {
     // User registration
@@ -16,10 +17,10 @@ const userRoutes = (app: Express): void => {
     app.post('/api/login', loginUser);
 
     // Get all users
-    app.get('/api/users', getUsers);
+    app.get('/api/users',authMiddleware, getUsers);
 
     // Get a user by ID
-    app.get('/api/users/:id', getUserById);
+    app.get('/api/users', getUser);
 
     // Update a user by ID
     app.put('/api/users/:id', updateUser);
