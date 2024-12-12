@@ -7,17 +7,22 @@ exports.authMiddleware = void 0;
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var authMiddleware = function (req, res, next) {
     var _a;
-    var token = (_a = req.header('Authorization')) === null || _a === void 0 ? void 0 : _a.replace('Bearer ', '');
+    var token = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
     if (!token) {
-        return res.status(401).json({ message: 'No token provided' });
+        return res.status(401).json({
+            message: 'Authorization token missing',
+        });
     }
     try {
-        var decoded = jsonwebtoken_1.default.verify(token, 'secret');
+        var decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET || 'default_secret');
         req.user = decoded;
         next();
     }
     catch (error) {
-        return res.status(401).json({ message: 'Invalid token' });
+        console.error('Token verification error:', error);
+        res.status(401).json({
+            message: 'Invalid or expired token',
+        });
     }
 };
 exports.authMiddleware = authMiddleware;

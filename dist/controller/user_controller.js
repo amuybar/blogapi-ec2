@@ -42,7 +42,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createUser = createUser;
 exports.getUsers = getUsers;
 exports.loginUser = loginUser;
-exports.getUserById = getUserById;
+exports.getUser = getUser;
 exports.updateUser = updateUser;
 exports.deleteUser = deleteUser;
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -221,39 +221,40 @@ function getUsers(req, res) {
         });
     });
 }
-function getUserById(req, res) {
+function getUser(req, res) {
     return __awaiter(this, void 0, void 0, function () {
-        var id, _a, user, error, error_4;
+        var email, _a, user, error, error_4;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    id = req.params.id;
+                    email = req.user.email;
                     _b.label = 1;
                 case 1:
                     _b.trys.push([1, 3, , 4]);
                     return [4 /*yield*/, supabaseService_1.supabase
                             .from('users')
                             .select('id, name, email')
-                            .eq('id', id)
+                            .eq('email', email)
                             .single()];
                 case 2:
                     _a = _b.sent(), user = _a.data, error = _a.error;
                     if (error) {
                         return [2 /*return*/, res.status(404).json({
                                 message: 'User not found',
+                                error: error instanceof Error ? error.message : String(error),
                             })];
                     }
                     res.status(200).json({
                         message: 'User fetched successfully',
-                        user: user
+                        user: user,
                     });
                     return [3 /*break*/, 4];
                 case 3:
                     error_4 = _b.sent();
-                    console.error('Get user by ID error:', error_4);
+                    console.error('Get user error:', error_4);
                     res.status(500).json({
                         message: 'Internal server error',
-                        error: error_4 instanceof Error ? error_4.message : String(error_4)
+                        error: error_4 instanceof Error ? error_4.message : String(error_4),
                     });
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
