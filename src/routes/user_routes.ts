@@ -17,10 +17,10 @@ const userRoutes = (app: Express): void => {
     app.post('/api/login', loginUser);
 
     // Get all users
-    app.get('/api/users',authMiddleware, getUsers);
+    app.get('/api/users', getUsers);
 
     // Get a user by ID
-    app.get('/api/users', getUser);
+    app.get('/api/users',authMiddleware, getUser);
 
     // Update a user by ID
     app.put('/api/users/:id', updateUser);
