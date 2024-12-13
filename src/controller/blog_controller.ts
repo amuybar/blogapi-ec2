@@ -94,16 +94,14 @@ const getAllBlogs = async (req: Request, res: Response) => {
 
 
 const getBlogBySlug = async (req: Request, res: Response) => {
-  console.log('Full params:', req.params);
   const { slug } = req.params; 
-  console.log('Slug received:', slug);
 
   const cleanedSlug = slug.startsWith(':') ? slug.slice(1) : slug;
 
   try {
     const { data, error } = await supabase
       .from('blogs')
-      .select('*, users(name)') // Join with users table to get name
+      .select('*, users(name)') 
       .eq('slug', cleanedSlug);
 
     if (error) throw error;
@@ -114,7 +112,7 @@ const getBlogBySlug = async (req: Request, res: Response) => {
 
     const blog = {
       ...data[0],
-      authorName: data[0].users?.name || 'Unknown', // Use name from users table
+      authorName: data[0].users?.name || 'Unknown', 
     };
 
     res.status(200).send({
