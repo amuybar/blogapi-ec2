@@ -12,16 +12,18 @@ dotenv.config();
 const app = express();
 const port = parseInt(process.env.PORT || '3000', 10);
 
-// Middleware Configuration
-const limiter = rateLimit({
+// General Rate Limiter
+const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 50, // limit each IP to 50 requests per windowMs
   message: "Too many requests from this IP, please try again after some time."
 });
 
+// Routes that don't require rate limiting
+const exemptRoutes = ['/api/blogs', '/api/login', '/api/register'];
+
 // Middleware Setup
 app.use(helmet());
-app.use(limiter);
 app.use(cors({
   origin: ['https://nairobidossier.co.ke', 'https://www.nairobidossier.co.ke'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -29,6 +31,15 @@ app.use(cors({
 }));
 app.use(morgan('dev'));
 app.use(bodyParser.json());
+
+// Apply rate limiting to routes that aren't exempt
+app.use((req, res, next) => {
+  if (!exemptRoutes.includes(req.path)) {
+    generalLimiter(req, res, next);
+  } else {
+    next();
+  }
+});
 
 // Custom Blocked Requests Middleware
 app.use((req, res, next) => {
