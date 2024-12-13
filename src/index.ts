@@ -14,13 +14,10 @@ const port = parseInt(process.env.PORT || '3000', 10);
 
 // General Rate Limiter
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // limit each IP to 50 requests per windowMs
+  windowMs: 15 * 60 * 1000, 
+  max: 99,
   message: "Too many requests from this IP, please try again after some time."
 });
-
-// Routes that don't require rate limiting
-const exemptRoutes = ['/api/blogs', '/api/login', '/api/register','/api/blogs/{slug}'];
 
 // Middleware Setup
 app.use(helmet());
@@ -32,21 +29,8 @@ app.use(cors({
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 
-// Apply rate limiting to routes that aren't exempt
-app.use((req, res, next) => {
-  const isExemptRoute = exemptRoutes.some(route => {
-    const regex = new RegExp(`^${route.replace(/\{slug\}/g, '[^/]+')}$`);
-    return regex.test(req.path);
-  });
-
-  if (!isExemptRoute) {
-    generalLimiter(req, res, next);
-  } else {
-    next();
-  }
-});
-
-
+// Apply rate limiting globally
+app.use(generalLimiter);
 
 // Routes
 routes(app);
