@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 import cors from 'cors';
+import path from 'path';
 import helmet from 'helmet';
 import routes from './routes/index_routes';
 const rateLimit = require("express-rate-limit");
@@ -18,6 +19,9 @@ const generalLimiter = rateLimit({
   max: 99,
   message: "Too many requests from this IP, please try again after some time."
 });
+// Middleware for serving static files
+app.use(express.static(path.join(__dirname, 'build')));
+
 
 // Middleware Setup
 app.use(helmet());
@@ -38,6 +42,10 @@ routes(app);
 // Default Route
 app.get('/', (req, res) => {
   res.send({ message: 'Welcome to Blog APIs' });
+});
+// Catch-all route for client-side routing
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
 });
 
 // 404 Error Handling
