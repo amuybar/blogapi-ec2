@@ -13,7 +13,12 @@ const port = parseInt(process.env.PORT || '3000', 10);
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: ['https://nairobidossier.co.ke', 'https://www.nairobidossier.co.ke'],  
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],  
+  allowedHeaders: ['Content-Type'],   
+}));
+
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 
