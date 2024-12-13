@@ -5,27 +5,46 @@ import morgan from 'morgan';
 import cors from 'cors';
 import helmet from 'helmet';
 import routes from './routes/index_routes';
+const rateLimit = require("express-rate-limit");
 
 dotenv.config();
 
 const app = express();
 const port = parseInt(process.env.PORT || '3000', 10);
 
-// Middleware
-app.use(helmet());
-app.use(cors({
-  origin: ['https://nairobidossier.co.ke', 'https://www.nairobidossier.co.ke'],  
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],  
-  allowedHeaders: ['Content-Type'],   
-}));
+// Middleware Configuration
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again after some time."
+});
 
+// Middleware Setup
+app.use(helmet());
+app.use(limiter);
+app.use(cors({
+  origin: ['https://nairobidossier.co.ke', 'https://www.nairobidossier.co.ke'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type'],
+}));
 app.use(morgan('dev'));
 app.use(bodyParser.json());
+
+// Custom Blocked Requests Middleware
+app.use((req, res, next) => {
+  const blockedPattern = '/LabTech/agent.aspx';
+  
+  if (req.url.includes(blockedPattern)) {
+    res.status(403).end(); // Block specific requests
+  } else {
+    next();
+  }
+});
 
 // Routes
 routes(app);
 
-// Default route
+// Default Route
 app.get('/', (req, res) => {
   res.send({ message: 'Welcome to Blog APIs' });
 });
@@ -34,6 +53,8 @@ app.get('/', (req, res) => {
 app.use((req, res) => {
   res.status(404).json({ message: 'Not found' });
 });
+
+// Log Middleware
 app.use((req, res, next) => {
   console.log(`Received ${req.method} request to ${req.path}`);
   next();
