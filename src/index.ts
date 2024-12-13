@@ -20,7 +20,7 @@ const generalLimiter = rateLimit({
 });
 
 // Routes that don't require rate limiting
-const exemptRoutes = ['/api/blogs', '/api/login', '/api/register'];
+const exemptRoutes = ['/api/blogs', '/api/login', '/api/register','/api/blogs/{slug}'];
 
 // Middleware Setup
 app.use(helmet());
@@ -34,7 +34,12 @@ app.use(bodyParser.json());
 
 // Apply rate limiting to routes that aren't exempt
 app.use((req, res, next) => {
-  if (!exemptRoutes.includes(req.path)) {
+  const isExemptRoute = exemptRoutes.some(route => {
+    const regex = new RegExp(`^${route.replace(/\{slug\}/g, '[^/]+')}$`);
+    return regex.test(req.path);
+  });
+
+  if (!isExemptRoute) {
     generalLimiter(req, res, next);
   } else {
     next();
