@@ -46,16 +46,7 @@ app.use((req, res, next) => {
   }
 });
 
-// Custom Blocked Requests Middleware
-app.use((req, res, next) => {
-  const blockedPattern = '/LabTech/agent.aspx';
-  
-  if (req.url.includes(blockedPattern)) {
-    res.status(403).end(); // Block specific requests
-  } else {
-    next();
-  }
-});
+
 
 // Routes
 routes(app);
